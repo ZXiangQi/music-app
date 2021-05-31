@@ -1,0 +1,100 @@
+<template>
+  <div class="scrollWrapper" ref="scrollWrapper">
+    <slot></slot>
+  </div>
+</template>
+
+<script>
+import BScroll from '@better-scroll/core'
+export default {
+  name: 'Scroll',
+  props: {
+    probeType: {
+      type: Number,
+      default: 1
+    },
+    click: {
+      type: Boolean,
+      default: true
+    },
+    data: {
+      type: Array,
+      default: null
+    },
+    listenScroll: {
+      type: Boolean,
+      default: false
+    },
+    pullup: {
+      type: Boolean,
+      default: false
+    },
+    beforeScroll: {
+      type: Boolean,
+      default: false
+    },
+    refreshDelay: {
+      type: Number,
+      default: 20
+    }
+  },
+  mounted() {
+    setTimeout(() => {
+      this._initScroll()
+      // console.log(this.scroll)
+    }, 20)
+  },
+  methods: {
+    _initScroll() {
+      this.scroll = new BScroll(this.$refs.scrollWrapper, {
+        probeType: this.probeType,
+        click: this.click
+      })
+      if (this.listenScroll) {
+        this.scroll.on('scroll', (pos) => {
+          this.$emit('scroll', pos)
+        })
+      }
+      if (this.pullup) {
+        this.scroll.on('scrollEnd', () => {
+          if (this.scroll.y <= (this.scroll.maxScrollY + 50)) {
+            this.$emit('scrollToEnd')
+          }
+        })
+      }
+      if (this.beforeScroll) {
+        this.scroll.on('beforeScrollStart', () => {
+          this.$emit('beforeScroll')
+        })
+      }
+    },
+    disable() {
+      this.scroll && this.scroll.disable()
+    },
+    enable() {
+      this.scroll && this.scroll.enable()
+    },
+    refresh() {
+      this.scroll && this.scroll.refresh()
+    },
+    scrollTo() {
+      this.scroll && this.scroll.scrollTo.apply(this.scroll, arguments)
+    },
+    scrollToElement() {
+      // 不是为了改变this指向，无需知道参数有多少个可以直接传入arguments
+      this.scroll && this.scroll.scrollToElement.apply(this.scroll, arguments)
+    }
+  },
+  watch: {
+    data() {
+      setTimeout(() => {
+        this.refresh()
+      }, this.refreshDelay)
+    }
+  }
+}
+</script>
+
+<style lang='stylus' scoped>
+
+</style>
